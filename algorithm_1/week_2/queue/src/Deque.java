@@ -4,9 +4,9 @@ import java.util.NoSuchElementException;
 public class Deque<Item> implements Iterable<Item> {
 
     private class Node {
-        public Item item;
-        public Node prev;
-        public Node next;
+        private Item item;
+        private Node prev;
+        private Node next;
 
         public Node(Item item, Node prev, Node next) {
             this.item = item;
@@ -36,13 +36,15 @@ public class Deque<Item> implements Iterable<Item> {
 
     public void addFirst(Item item) {
         checkInsertedItemShouldNotNull(item);
-        head.next = head.next.prev = new Node(item, head, head.next);
+        head.next.prev = new Node(item, head, head.next);
+        head.next = head.next.prev;
         ++count;
     }
 
     public void addLast(Item item) {
         checkInsertedItemShouldNotNull(item);
-        tail.prev = tail.prev.next = new Node(item, tail.prev, tail);
+        tail.prev.next = new Node(item, tail.prev, tail);
+        tail.prev = tail.prev.next;
         ++count;
     }
 
@@ -67,20 +69,19 @@ public class Deque<Item> implements Iterable<Item> {
     @Override
     public Iterator<Item> iterator() {
         return new Iterator<Item>() {
-
             private Node cur = head;
             @Override
             public boolean hasNext() {
                 return cur.next != tail;
             }
-
             @Override
             public Item next() {
-                checkShouldNotCallRemoveIfQueueIsEmpty();
+                if (cur.next == tail) {
+                    throw new NoSuchElementException("Reach Deque tail.");
+                }
                 cur = cur.next;
                 return cur.item;
             }
-
             @Override
             public void remove() {
                 throw new UnsupportedOperationException("Remove item during iterating is not allowed.");
@@ -89,13 +90,13 @@ public class Deque<Item> implements Iterable<Item> {
         };
     }
 
-    private void checkInsertedItemShouldNotNull(Item item) throws NullPointerException {
+    private void checkInsertedItemShouldNotNull(Item item) {
         if (item == null) {
             throw new NullPointerException("Item should not be null.");
         }
     }
 
-    private void checkShouldNotCallRemoveIfQueueIsEmpty() throws NoSuchElementException {
+    private void checkShouldNotCallRemoveIfQueueIsEmpty() {
         if (isEmpty()) {
             throw new NoSuchElementException("Queue is empty.");
         }

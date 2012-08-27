@@ -36,7 +36,12 @@ public class RandomizedQueue<Item> implements Iterable<Item> {
         int index = rand.nextInt(size());
         swap(index, size() - 1);
         --count;
-        return buf[count];
+        Item item = buf[count];
+        buf[count] = null;
+        if (size() < (capacity / 4)) {
+            resize(capacity / 2);
+        }
+        return item;
     }
 
     public Item sample() {
@@ -46,38 +51,7 @@ public class RandomizedQueue<Item> implements Iterable<Item> {
 
     @Override
     public Iterator<Item> iterator() {
-        return new Iterator<Item>() {
-            private Item[] randomQueue = null;
-            private int currentIndex = 0;
-            {
-                randomQueue = (Item[]) new Object[size()];
-                Random r = new Random();
-                for (int i = 0; i < size(); ++i) {
-                    randomQueue[i] = buf[i];
-                    int index = r.nextInt(i+1);
-                    Item tmp = randomQueue[index];
-                    randomQueue[index] = randomQueue[i];
-                    randomQueue[i] = tmp;
-                }
-            }
-
-            @Override
-            public boolean hasNext() {
-                return currentIndex < size();
-            }
-
-            @Override
-            public Item next() {
-                checkShouldNotCallRemoveIfQueueIsEmpty();
-                return randomQueue[currentIndex++];
-            }
-
-            @Override
-            public void remove() {
-                throw new UnsupportedOperationException("Remove item during iterating is not allowed.");
-            }
-
-        };
+        return new RandomizedQueueIterator();
     }
 
     private void resize(int newCapacity) {
@@ -95,15 +69,50 @@ public class RandomizedQueue<Item> implements Iterable<Item> {
         buf[j] = tmp;
     }
 
-    private void checkInsertedItemShouldNotNull(Item item) throws NullPointerException {
+    private void checkInsertedItemShouldNotNull(Item item) {
         if (item == null) {
             throw new NullPointerException("Item should not be null.");
         }
     }
 
-    private void checkShouldNotCallRemoveIfQueueIsEmpty() throws NoSuchElementException {
+    private void checkShouldNotCallRemoveIfQueueIsEmpty() {
         if (isEmpty()) {
             throw new NoSuchElementException("Queue is empty.");
         }
     }
+
+    private class RandomizedQueueIterator implements Iterator<Item> {
+        private Item[] randomQueue = null;
+        private int currentIndex = 0;
+
+        public RandomizedQueueIterator() {
+            randomQueue = (Item[]) new Object[size()];
+            Random r = new Random();
+            for (int i = 0; i < size(); ++i) {
+                randomQueue[i] = buf[i];
+                int index = r.nextInt(i + 1);
+                Item tmp = randomQueue[index];
+                randomQueue[index] = randomQueue[i];
+                randomQueue[i] = tmp;
+            }
+        }
+
+        @Override
+        public boolean hasNext() {
+            return currentIndex < size();
+        }
+
+        @Override
+        public Item next() {
+            if (currentIndex >= size()) {
+                throw new NoSuchElementException("Exceed the end of the queue.");
+            }
+            return randomQueue[currentIndex++];
+        }
+
+        @Override
+        public void remove() {
+            throw new UnsupportedOperationException("Remove item during iterating is not allowed.");
+        }
+    };
 }
