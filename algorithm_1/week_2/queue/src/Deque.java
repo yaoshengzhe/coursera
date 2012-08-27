@@ -46,18 +46,22 @@ public class Deque<Item> implements Iterable<Item> {
         ++count;
     }
 
-    public void removeFirst() {
+    public Item removeFirst() {
         checkShouldNotCallRemoveIfQueueIsEmpty();
+        Item item = head.next.item;
         head.next = head.next.next;
         head.next.prev = head;
         --count;
+        return item;
     }
 
-    public void removeLast() {
+    public Item removeLast() {
         checkShouldNotCallRemoveIfQueueIsEmpty();
+        Item item = tail.prev.item;
         tail.prev = tail.prev.prev;
         tail.prev.next = tail;
         --count;
+        return item;
     }
 
     @Override
@@ -72,6 +76,7 @@ public class Deque<Item> implements Iterable<Item> {
 
             @Override
             public Item next() {
+                checkShouldNotCallRemoveIfQueueIsEmpty();
                 cur = cur.next;
                 return cur.item;
             }
