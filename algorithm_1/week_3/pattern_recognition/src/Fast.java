@@ -21,6 +21,9 @@ public class Fast {
             pointColl.add(new Point(x, y));
         }
         in.close();
+        if (pointColl.size() < 3) {
+            return;
+        }
 
         StdDraw.setXscale(0, 32768);
         StdDraw.setYscale(0, 32768);
@@ -35,18 +38,14 @@ public class Fast {
             int start = 0;
             int end = 1;
             int max = -1;
-            int maxStart = 0;
-            int maxEnd = 1;
 
             for (int i = 1; i < pointColl.size(); ++i) {
                 Point curPoint = pointColl.get(i);
                 if (p.SLOPE_ORDER.compare(prevPoint, curPoint) == 0) {
                     end++;
                 } else {
-                    if (end - start > max) {
-                        max = end - start;
-                        maxStart = start;
-                        maxEnd = end;
+                    if (end - start > 2) {
+                        outputSegment(pointColl, start, end, colinearSegmentSet);
                     }
                     start = i;
                     end = i + 1;
@@ -55,27 +54,27 @@ public class Fast {
                 prevPoint = curPoint;
             }
 
-            if (end - start > max) {
-                max = end - start;
-                maxStart = start;
-                maxEnd = end;
+            if (end - start > 2) {
+                outputSegment(pointColl, start, end, colinearSegmentSet);
             }
+        }
+    }
 
-            List<Point> subList = new ArrayList<Point>();
-            for (int i = maxStart; i < maxEnd; ++i) {
-                subList.add(pointColl.get(i));
-            }
-            if (maxStart > 0) {
-                subList.add(pointColl.get(0));
-            }
-            if (subList.size() > 3) {
+    private static void outputSegment(List<Point> pointColl, int start, int end, Set<String> colinearSegmentSet) {
+        List<Point> subList = new ArrayList<Point>();
+        for (int i = start; i < end; ++i) {
+            subList.add(pointColl.get(i));
+        }
+        if (start > 0) {
+            subList.add(pointColl.get(0));
+        }
+        if (subList.size() > 3) {
 
-                Collections.sort(subList);
-                String key = colinearSegmentToString(subList);
-                if (!colinearSegmentSet.contains(key)) {
-                    drawPointColl(subList);
-                    colinearSegmentSet.add(key);
-                }
+            Collections.sort(subList);
+            String key = colinearSegmentToString(subList);
+            if (!colinearSegmentSet.contains(key)) {
+                drawPointColl(subList);
+                colinearSegmentSet.add(key);
             }
         }
     }
