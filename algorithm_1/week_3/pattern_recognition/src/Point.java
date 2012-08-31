@@ -17,8 +17,8 @@ public class Point implements Comparable<Point> {
     // compare points by slope
     public final Comparator<Point> SLOPE_ORDER = new SlopeOrderComparator();
 
-    private final int x;                              // x coordinate
-    private final int y;                              // y coordinate
+    private final int x; // x coordinate
+    private final int y; // y coordinate
 
     // create the point (x, y)
     public Point(int x, int y) {
@@ -41,12 +41,15 @@ public class Point implements Comparable<Point> {
 
     // slope between this point and that point
     public double slopeTo(Point that) {
-        if (this.equals(that)) {
+        if (this.compareTo(that) == 0) {
             return Double.NEGATIVE_INFINITY;
         } else if (this.x == that.x) {
             return Double.POSITIVE_INFINITY;
-        } else {
-            return (this.y - that.y) / (this.x - that.x);
+        } else if (this.y == that.y) {
+            return 0;
+        }
+        else {
+            return (double) (this.y - that.y) / (this.x - that.x);
         }
     }
 
@@ -54,7 +57,11 @@ public class Point implements Comparable<Point> {
     // comparing y-coordinates and breaking ties by x-coordinates
     @Override
     public int compareTo(Point that) {
-        return (this.y == that.y) ? (this.x - that.x) : (this.y - that.y);
+        if (this.y == that.y) {
+            return this.x - that.x;
+        } else {
+            return this.y - that.y;
+        }
     }
 
     // return string representation of this point
@@ -74,12 +81,20 @@ public class Point implements Comparable<Point> {
         public int compare(Point a, Point b) {
             double slopeToA = Point.this.slopeTo(a);
             double slopeToB = Point.this.slopeTo(b);
-            if (slopeToA < slopeToB) {
-                return -1;
-            } else if (slopeToA > slopeToB) {
-                return 1;
-            } else {
+            if (slopeToA == Double.NEGATIVE_INFINITY && slopeToB == Double.NEGATIVE_INFINITY) {
                 return 0;
+            }
+
+            if (slopeToA == Double.POSITIVE_INFINITY && slopeToB == Double.POSITIVE_INFINITY) {
+                return 0;
+            }
+
+            if (Math.abs(slopeToA - slopeToB) < 1e-6) {
+                return 0;
+            } else if (slopeToA < slopeToB) {
+                return -1;
+            } else {
+                return 1;
             }
         }
     }
