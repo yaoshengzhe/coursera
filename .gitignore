@@ -2,3 +2,4 @@ build
 bin
 *.class
 *.zip
+*.txt
