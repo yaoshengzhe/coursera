@@ -8,7 +8,6 @@ public class Board {
     private int blankRow = -1;
     private int blankColumn = -1;
 
-
     public Board(int[][] blocks) {
         dimension = blocks.length;
         this.board = new int[dimension][dimension];
@@ -47,7 +46,7 @@ public class Board {
         for (int i = 0; i < dimension(); ++i) {
             for (int j = 0; j < dimension(); ++j) {
                 if (board[i][j] != 0) {
-                    int num = board[i][j];
+                    int num = board[i][j] - 1;
                     int correctRow = num / dimension();
                     int correctColumn = num - correctRow * dimension();
                     cost += Math.abs(i - correctRow);
@@ -64,13 +63,13 @@ public class Board {
 
     public Board twin() {
         Board that = new Board(board);
+
         for (int i = 0; i < dimension(); ++i) {
-            for (int j = 0; j < dimension() - 1; ++j) {
-                if (that.board[i][j] != 0 && that.board[i][j+1] != 0) {
-                    that.swap(i, j, i, j + 1);
-                    break;
-                }
+            if (i == blankRow) {
+                continue;
             }
+            that.swap(i, 0, i, 1);
+            break;
         }
         return that;
     }
@@ -79,6 +78,10 @@ public class Board {
     public boolean equals(Object y) {
         if (this == y) {
             return true;
+        }
+
+        if (y == null) {
+            return false;
         }
 
         if (this.getClass() != y.getClass()) {
@@ -104,24 +107,24 @@ public class Board {
 
     public Iterable<Board> neighbors() {
         List<Board> neighborColl = new ArrayList<Board>();
-        Board board = moveBlank(Direction.UP);
-        if (board != null) {
-            neighborColl.add(board);
+        Board newBoard = moveBlank(Direction.UP);
+        if (newBoard != null) {
+            neighborColl.add(newBoard);
         }
 
-        board = moveBlank(Direction.DOWN);
-        if (board != null) {
-            neighborColl.add(board);
+        newBoard = moveBlank(Direction.DOWN);
+        if (newBoard != null) {
+            neighborColl.add(newBoard);
         }
 
-        board = moveBlank(Direction.LEFT);
-        if (board != null) {
-            neighborColl.add(board);
+        newBoard = moveBlank(Direction.LEFT);
+        if (newBoard != null) {
+            neighborColl.add(newBoard);
         }
 
-        board = moveBlank(Direction.RIGHT);
-        if (board != null) {
-            neighborColl.add(board);
+        newBoard = moveBlank(Direction.RIGHT);
+        if (newBoard != null) {
+            neighborColl.add(newBoard);
         }
 
         return neighborColl;
@@ -153,7 +156,7 @@ public class Board {
     private Board moveBlank(Direction direction) {
         Board that = null;
         if (direction == Direction.UP) {
-            if (blankRow - 1 > 0) {
+            if (blankRow - 1 > -1) {
                 that = new Board(board);
                 that.swap(blankRow, blankColumn, blankRow - 1, blankColumn);
                 that.blankRow--;
@@ -165,7 +168,7 @@ public class Board {
                 that.blankRow++;
             }
         } else if (direction == Direction.LEFT) {
-            if (blankColumn - 1 > 0) {
+            if (blankColumn - 1 > -1) {
                 that = new Board(board);
                 that.swap(blankRow, blankColumn, blankRow, blankColumn - 1);
                 that.blankColumn--;

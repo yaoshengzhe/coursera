@@ -37,7 +37,11 @@ public class Solver {
 
         @Override
         public int compareTo(Puzzle that) {
-            return board.equals(that.board) ? 0 : 1;
+            if (board.equals(that.board)) {
+                return 0;
+            } else {
+                return 1;
+            }
         }
     }
 
@@ -70,6 +74,9 @@ public class Solver {
             Puzzle puzzle = priorityQueue.delMin();
             Puzzle twinPuzzle = twinPriorityQueue.delMin();
 
+            closedPuzzleSet.add(puzzle);
+            twinClosedPuzzleSet.add(twinPuzzle);
+
             if (puzzle.getBoard().isGoal() || twinPuzzle.getBoard().isGoal()) {
                 if (puzzle.getBoard().isGoal()) {
                     minMoveNum = 0;
@@ -81,6 +88,7 @@ public class Solver {
                     }
                     solutionStepColl.addFirst(current.getBoard());
                 } else {
+                    solutionStepColl = null;
                     minMoveNum = -1;
                 }
                 break;
@@ -90,8 +98,9 @@ public class Solver {
                 Puzzle p = new Puzzle(neighbor, neighbor.manhattan(), puzzle, puzzle.getLevel() + 1);
 
                 if (!closedPuzzleSet.contains(p)) {
-                    priorityQueue.insert(p);
-                    closedPuzzleSet.add(p);
+                    if ((puzzle.getParent() == null || !p.getBoard().equals(puzzle.getParent().getBoard()))) {
+                        priorityQueue.insert(p);
+                    }
                 }
             }
 
@@ -99,15 +108,16 @@ public class Solver {
                 Puzzle p = new Puzzle(neighbor, neighbor.manhattan(), twinPuzzle, twinPuzzle.getLevel() + 1);
 
                 if (!twinClosedPuzzleSet.contains(p)) {
-                    twinPriorityQueue.insert(p);
-                    twinClosedPuzzleSet.add(p);
+                    if ((twinPuzzle.getParent() == null || !p.getBoard().equals(twinPuzzle.getParent().getBoard()))) {
+                        twinPriorityQueue.insert(p);
+                    }
                 }
             }
         }
     }
 
     public boolean isSolvable() {
-        return !solutionStepColl.isEmpty();
+        return solutionStepColl != null;
     }
 
     public int moves() {
