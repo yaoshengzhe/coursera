@@ -51,7 +51,7 @@ public class KdTree {
                 return node;
             } else if ((node.isVertical && p.x() <= node.x) || (!node.isVertical && p.y() <= node.y)) {
                 node.left = insertHelper(node.left, p, !node.isVertical);
-            } else if ((node.isVertical && p.x() > node.x) || (!node.isVertical && p.y() > node.y)) {
+            } else { // if ((node.isVertical && p.x() > node.x) || (!node.isVertical && p.y() > node.y)) {
                 node.right = insertHelper(node.right, p, !node.isVertical);
             }
             return node;
@@ -65,10 +65,8 @@ public class KdTree {
                 return true;
             } else if ((node.isVertical && p.x() <= node.x) || (!node.isVertical && p.y() <= node.y)) {
                 node = node.left;
-            } else if ((node.isVertical && p.x() > node.x) || (!node.isVertical && p.y() > node.y)) {
+            } else { //if ((node.isVertical && p.x() > node.x) || (!node.isVertical && p.y() > node.y)) {
                 node = node.right;
-            } else {
-                break;
             }
         }
         return false;
@@ -79,32 +77,37 @@ public class KdTree {
         draw(tree, BORAD_RECT);
     }
 
+    private RectHV getLeftChildRect(RectHV nodeRect, TreeNode node) {
+        if (node.isVertical) {
+            return new RectHV(nodeRect.xmin(), nodeRect.ymin(), node.x, nodeRect.ymax());
+        } else {
+            return new RectHV(nodeRect.xmin(), nodeRect.ymin(), nodeRect.xmax(), node.y);
+        }
+    }
+
+    private RectHV getRightChildRect(RectHV nodeRect, TreeNode node) {
+        if (node.isVertical) {
+            return new RectHV(node.x, nodeRect.ymin(), nodeRect.xmax(), nodeRect.ymax());
+        } else {
+            return new RectHV(nodeRect.xmin(), node.y, nodeRect.xmax(), nodeRect.ymax());
+        }
+    }
     private void draw(TreeNode node, RectHV rect) {
         if (node != null) {
             StdDraw.setPenColor(StdDraw.BLACK);
             StdDraw.setPenRadius(0.02);
             new Point2D(node.x, node.y).draw();
-
-            RectHV leftRect = null;
-            RectHV rightRect = null;
-
             StdDraw.setPenRadius();
 
             if (node.isVertical) {
                 StdDraw.setPenColor(StdDraw.RED);
                 new Point2D(node.x, rect.ymin()).drawTo(new Point2D(node.x, rect.ymax()));
-
-                leftRect = new RectHV(rect.xmin(), rect.ymin(), node.x, rect.ymax());
-                rightRect = new RectHV(node.x, rect.ymin(), rect.xmax(), rect.ymax());
             } else {
                 StdDraw.setPenColor(StdDraw.BLUE);
                 new Point2D(rect.xmin(), node.y).drawTo(new Point2D(rect.xmax(), node.y));
-
-                leftRect = new RectHV(rect.xmin(), rect.ymin(), rect.xmax(), node.y);
-                rightRect = new RectHV(rect.xmin(), node.y, rect.xmax(), rect.ymax());
             }
-            draw(node.left, leftRect);
-            draw(node.right, rightRect);
+            draw(node.left, getLeftChildRect(rect, node));
+            draw(node.right, getRightChildRect(rect, node));
         }
     }
 
@@ -115,18 +118,8 @@ public class KdTree {
                 if (rect.contains(p)) {
                     pointInRect.add(p);
                 }
-                RectHV leftRect = null;
-                RectHV rightRect = null;
-
-                if (node.isVertical) {
-                    leftRect = new RectHV(nodeRect.xmin(), nodeRect.ymin(), node.x, nodeRect.ymax());
-                    rightRect = new RectHV(node.x, nodeRect.ymin(), nodeRect.xmax(), nodeRect.ymax());
-                } else {
-                    leftRect = new RectHV(nodeRect.xmin(), nodeRect.ymin(), nodeRect.xmax(), node.y);
-                    rightRect = new RectHV(nodeRect.xmin(), node.y, nodeRect.xmax(), nodeRect.ymax());
-                }
-                rangeHelper(node.left, leftRect, rect, pointInRect);
-                rangeHelper(node.right, rightRect, rect, pointInRect);
+                rangeHelper(node.left, getLeftChildRect(nodeRect, node), rect, pointInRect);
+                rangeHelper(node.right, getRightChildRect(nodeRect, node), rect, pointInRect);
             }
         }
     }
@@ -152,7 +145,6 @@ public class KdTree {
             RectHV leftRect = null;
             RectHV rightRect = null;
             Point2D queryPoint = new Point2D(x, y);
-
 
             if (nearestPoint == null || queryPoint.distanceSquaredTo(nearestPoint) > rect.distanceSquaredTo(queryPoint)) {
 
