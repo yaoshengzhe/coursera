@@ -29,6 +29,8 @@ public class PointSET {
     }
 
     public void draw() {
+        StdDraw.setScale(0, 1);
+        StdDraw.setPenRadius(0.02);
         for (Point2D p : pointSet) {
             p.draw();
         }
