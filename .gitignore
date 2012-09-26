@@ -6,8 +6,9 @@ bin
 *.txt
 output
 out
-lib_managed/jars
 cache
+.cache
 out
 scala-2.9.2
-streams/compile
+lib_managed
+*/target/streams/*
