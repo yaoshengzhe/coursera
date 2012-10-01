@@ -64,32 +64,43 @@ Theta2_grad = zeros(size(Theta2));
 
 
 reg = 0;
+
 theta1_reg = Theta1;
 theta1_reg(:, 1) = 0;
-reg = reg + sum(sum(lambda / (2 * m) * theta1_reg' * theta1_reg));
+reg = reg + lambda / (2 * m) * sum(sum(theta1_reg.^2));
 
 theta2_reg = Theta2;
 theta2_reg(:, 1) = 0;
-reg = reg + sum(sum(lambda / (2 * m) * theta2_reg' * theta2_reg));
+reg = reg + lambda / (2 * m) * sum(sum(theta2_reg.^2));
 
-X1 = sigmoid( [ones(size(X, 1), 1), X] * Theta1');
-A2 = X1;
+A1 = [ones(size(X, 1), 1), X];
+X1 = sigmoid( A1 * Theta1');
 
-Z = sigmoid([ones(size(X1, 1), 1), X1] * Theta2');
+A2 = [ones(size(X1, 1), 1), X1];
+Z = sigmoid( A2 * Theta2');
+
 yk = zeros(size(Z));
+py = zeros(size(Z));
+
+[_, predict_y] = max(Z, [], 2);
+
 for i=1:size(y, 1)
   yk(i, y(i)) = 1;
+  py(i, predict_y(i)) = 1;
 end
 
 
 J = sum(sum(-yk .* log(Z) - (1 - yk) .* log(1 - Z))) / m + reg;
 
 delta_3 = Z - yk;
-delta_2 = Theta2' * delta_3 .* A2 .* (1 - A2);
-size(delta_2)
+delta_2 = delta_3 * Theta2 .* A2 .* (1 - A2);
 
 
+Theta1_grad = delta_2' * A1;
+Theta1_grad(1, :) = [];
 
+Theta1_grad = Theta1_grad / m + lambda * theta1_reg / m;
+Theta2_grad = delta_3' * A2 / m + lambda * theta2_reg / m;
 
 
 
